@@ -12,7 +12,7 @@ bg_color = Color(1, 0.351573, 0.183529, 1)
 script = ExtResource("1_uu6xs")
 
 [node name="DiceContainer" type="Node2D" parent="."]
-position = Vector2(102, 164)
+position = Vector2(197, 186)
 
 [node name="Dice1" type="Sprite2D" parent="DiceContainer"]
 position = Vector2(150, 100)
@@ -68,40 +68,61 @@ offset_bottom = 40.0
 
 [node name="LabelRollsLeft" type="Label" parent="LabelContainer"]
 layout_mode = 2
-offset_left = 81.0
-offset_top = 299.0
-offset_right = 148.0
-offset_bottom = 322.0
+offset_left = 84.0
+offset_top = 335.0
+offset_right = 151.0
+offset_bottom = 358.0
 text = "RollsLeft"
 
 [node name="LabelPlaysLeft" type="Label" parent="LabelContainer"]
 layout_mode = 2
-offset_left = 77.0
-offset_top = 324.0
-offset_right = 147.0
-offset_bottom = 347.0
+offset_left = 82.0
+offset_top = 363.0
+offset_right = 152.0
+offset_bottom = 386.0
 text = "PlaysLeft"
 
 [node name="LabelSetType" type="Label" parent="LabelContainer"]
 layout_mode = 2
-offset_left = 70.0
-offset_top = 211.0
-offset_right = 132.0
-offset_bottom = 234.0
+offset_left = 73.0
+offset_top = 253.0
+offset_right = 135.0
+offset_bottom = 276.0
 text = "SetType"
 
 [node name="LabelPoints" type="Label" parent="LabelContainer"]
 layout_mode = 2
-offset_left = 88.0
-offset_top = 239.0
-offset_right = 137.0
-offset_bottom = 262.0
+offset_left = 75.0
+offset_top = 287.0
+offset_right = 124.0
+offset_bottom = 310.0
 text = "Points"
 
 [node name="LabelMult" type="Label" parent="LabelContainer"]
 layout_mode = 2
-offset_left = 89.0
-offset_top = 262.0
-offset_right = 129.0
-offset_bottom = 285.0
+offset_left = 166.0
+offset_top = 289.0
+offset_right = 206.0
+offset_bottom = 312.0
 text = "Mult"
+
+[node name="LabelSetScore" type="Label" parent="LabelContainer"]
+layout_mode = 0
+offset_left = 153.0
+offset_top = 252.0
+offset_right = 220.0
+offset_bottom = 275.0
+text = "SetScore"
+
+[node name="LabelTotalScore" type="Label" parent="LabelContainer"]
+layout_mode = 0
+offset_left = 73.0
+offset_top = 168.0
+offset_right = 113.0
+offset_bottom = 191.0
+text = "TotalScore
+"
+
+[node name="ScoreLabel" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0
