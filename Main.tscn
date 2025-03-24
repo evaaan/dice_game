@@ -1,0 +1,107 @@
+[gd_scene load_steps=4 format=3 uid="uid://c2df5vjej30ly"]
+
+[ext_resource type="Script" uid="uid://d2plnbqlt0xt3" path="res://main.gd" id="1_uu6xs"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glv2v"]
+bg_color = Color(0.182789, 0.710422, 0.366996, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uu6xs"]
+bg_color = Color(1, 0.351573, 0.183529, 1)
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_uu6xs")
+
+[node name="DiceContainer" type="Node2D" parent="."]
+position = Vector2(102, 164)
+
+[node name="Dice1" type="Sprite2D" parent="DiceContainer"]
+position = Vector2(150, 100)
+scale = Vector2(0.5, 0.5)
+
+[node name="Dice2" type="Sprite2D" parent="DiceContainer"]
+position = Vector2(300, 100)
+scale = Vector2(0.5, 0.5)
+
+[node name="Dice3" type="Sprite2D" parent="DiceContainer"]
+position = Vector2(450, 100)
+scale = Vector2(0.5, 0.5)
+
+[node name="Dice4" type="Sprite2D" parent="DiceContainer"]
+position = Vector2(600, 100)
+scale = Vector2(0.5, 0.5)
+
+[node name="Dice5" type="Sprite2D" parent="DiceContainer"]
+position = Vector2(750, 100)
+scale = Vector2(0.5, 0.5)
+
+[node name="ButtonRoll" type="Button" parent="."]
+custom_minimum_size = Vector2(100, 50)
+offset_left = 325.0
+offset_top = 426.0
+offset_right = 354.0
+offset_bottom = 449.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_glv2v")
+text = "Roll"
+
+[node name="ButtonPlay" type="Button" parent="."]
+custom_minimum_size = Vector2(100, 50)
+offset_left = 503.0
+offset_top = 423.0
+offset_right = 603.0
+offset_bottom = 473.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_uu6xs")
+text = "Play"
+
+[node name="ButtonRestart" type="Button" parent="."]
+custom_minimum_size = Vector2(100, 50)
+offset_left = 826.0
+offset_top = 425.0
+offset_right = 891.0
+offset_bottom = 456.0
+text = "Restart"
+
+[node name="LabelContainer" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="LabelRollsLeft" type="Label" parent="LabelContainer"]
+layout_mode = 2
+offset_left = 81.0
+offset_top = 299.0
+offset_right = 148.0
+offset_bottom = 322.0
+text = "RollsLeft"
+
+[node name="LabelPlaysLeft" type="Label" parent="LabelContainer"]
+layout_mode = 2
+offset_left = 77.0
+offset_top = 324.0
+offset_right = 147.0
+offset_bottom = 347.0
+text = "PlaysLeft"
+
+[node name="LabelSetType" type="Label" parent="LabelContainer"]
+layout_mode = 2
+offset_left = 70.0
+offset_top = 211.0
+offset_right = 132.0
+offset_bottom = 234.0
+text = "SetType"
+
+[node name="LabelPoints" type="Label" parent="LabelContainer"]
+layout_mode = 2
+offset_left = 88.0
+offset_top = 239.0
+offset_right = 137.0
+offset_bottom = 262.0
+text = "Points"
+
+[node name="LabelMult" type="Label" parent="LabelContainer"]
+layout_mode = 2
+offset_left = 89.0
+offset_top = 262.0
+offset_right = 129.0
+offset_bottom = 285.0
+text = "Mult"
