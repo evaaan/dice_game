@@ -1,0 +1,40 @@
+[gd_scene load_steps=2 format=3 uid="uid://bhjiuf7na57tj"]
+
+[ext_resource type="Script" uid="uid://407lnkd243jf" path="res://planning.gd" id="1_8p4yj"]
+
+[node name="Planning" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_8p4yj")
+
+[node name="LabelRound" type="Label" parent="."]
+layout_mode = 0
+offset_left = 466.0
+offset_top = 300.0
+offset_right = 576.0
+offset_bottom = 323.0
+text = "Round N of 12"
+
+[node name="LabelScore" type="Label" parent="."]
+layout_mode = 0
+offset_left = 468.0
+offset_top = 341.0
+offset_right = 633.0
+offset_bottom = 364.0
+text = "Next Score to Beat: N"
+
+[node name="LabelMoney" type="Label" parent="."]
+layout_mode = 0
+offset_left = 474.0
+offset_top = 380.0
+offset_right = 527.0
+offset_bottom = 403.0
+text = "Money: N"
+
+[node name="ButtonContinue" type="Button" parent="."]
+layout_mode = 0
+offset_left = 487.0
+offset_top = 464.0
+offset_right = 566.0
+offset_bottom = 495.0
+text = "Continue"

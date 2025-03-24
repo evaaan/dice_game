@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3 uid="uid://c20t4fbyfa6ct"]
+
+[ext_resource type="Script" uid="uid://bx4guen3rpupi" path="res://MainMenu.gd" id="1_eiy7p"]
+[ext_resource type="Script" uid="uid://bu3ihe8xau0ow" path="res://Title.gd" id="1_i26rj"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_eiy7p")
+
+[node name="Title" type="Label" parent="."]
+offset_left = 344.0
+offset_top = 132.0
+offset_right = 698.0
+offset_bottom = 333.0
+theme_override_font_sizes/font_size = 72
+text = "DiceGame"
+script = ExtResource("1_i26rj")
+
+[node name="ButtonPlay" type="Button" parent="."]
+offset_left = 539.0
+offset_top = 387.0
+offset_right = 580.0
+offset_bottom = 418.0
+text = "Play"
+
+[node name="ButtonExit" type="Button" parent="."]
+offset_left = 540.0
+offset_top = 461.0
+offset_right = 577.0
+offset_bottom = 492.0
+text = "Exit"

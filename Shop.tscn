@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://6u2gwpewjm1t"]
+
+[ext_resource type="Script" uid="uid://bsjimwj6jsm8v" path="res://shop.gd" id="1_c53l5"]
+
+[node name="Node2D" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_c53l5")
+
+[node name="ButtonContinue" type="Button" parent="."]
+layout_mode = 0
+offset_left = 484.0
+offset_top = 396.0
+offset_right = 525.0
+offset_bottom = 427.0
+text = "Play
+"

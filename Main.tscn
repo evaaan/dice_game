@@ -36,29 +36,28 @@ scale = Vector2(0.5, 0.5)
 
 [node name="ButtonRoll" type="Button" parent="."]
 custom_minimum_size = Vector2(100, 50)
-offset_left = 325.0
+offset_left = 565.0
 offset_top = 426.0
-offset_right = 354.0
-offset_bottom = 449.0
+offset_right = 665.0
+offset_bottom = 476.0
 theme_override_styles/normal = SubResource("StyleBoxFlat_glv2v")
 text = "Roll"
 
 [node name="ButtonPlay" type="Button" parent="."]
 custom_minimum_size = Vector2(100, 50)
-offset_left = 503.0
-offset_top = 423.0
-offset_right = 603.0
-offset_bottom = 473.0
+offset_left = 416.0
+offset_top = 427.0
+offset_right = 516.0
+offset_bottom = 477.0
 theme_override_styles/normal = SubResource("StyleBoxFlat_uu6xs")
 text = "Play"
 
-[node name="ButtonRestart" type="Button" parent="."]
-custom_minimum_size = Vector2(100, 50)
-offset_left = 826.0
-offset_top = 425.0
-offset_right = 891.0
-offset_bottom = 456.0
-text = "Restart"
+[node name="ButtonMainMenu" type="Button" parent="."]
+offset_left = 944.0
+offset_top = 426.0
+offset_right = 1044.0
+offset_bottom = 476.0
+text = "Main Menu"
 
 [node name="LabelContainer" type="Control" parent="."]
 layout_mode = 3
@@ -83,12 +82,14 @@ offset_bottom = 386.0
 text = "PlaysLeft"
 
 [node name="LabelSetType" type="Label" parent="LabelContainer"]
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
-offset_left = 73.0
-offset_top = 253.0
-offset_right = 135.0
-offset_bottom = 276.0
+offset_left = 1.0
+offset_top = 256.0
+offset_right = 151.0
+offset_bottom = 279.0
 text = "SetType"
+horizontal_alignment = 2
 
 [node name="LabelPoints" type="Label" parent="LabelContainer"]
 layout_mode = 2
@@ -108,10 +109,10 @@ text = "Mult"
 
 [node name="LabelSetScore" type="Label" parent="LabelContainer"]
 layout_mode = 0
-offset_left = 178.0
-offset_top = 253.0
-offset_right = 245.0
-offset_bottom = 276.0
+offset_left = 169.0
+offset_top = 256.0
+offset_right = 236.0
+offset_bottom = 279.0
 text = "SetScore"
 
 [node name="LabelTotalScore" type="Label" parent="LabelContainer"]
@@ -141,6 +142,18 @@ offset_bottom = 463.0
 text = "RoundNumber
 "
 
-[node name="ScoreLabel" type="Label" parent="."]
-offset_right = 40.0
-offset_bottom = 23.0
+[node name="LabelMoney" type="Label" parent="LabelContainer"]
+layout_mode = 0
+offset_left = 82.0
+offset_top = 444.0
+offset_right = 135.0
+offset_bottom = 467.0
+text = "Money"
+
+[node name="ButtonDebug" type="Button" parent="."]
+offset_left = 880.0
+offset_top = 522.0
+offset_right = 1042.0
+offset_bottom = 553.0
+text = "+100 Points (Debug)
+"

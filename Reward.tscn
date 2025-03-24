@@ -1,0 +1,26 @@
+[gd_scene load_steps=2 format=3 uid="uid://vloxbd27nmj0"]
+
+[ext_resource type="Script" uid="uid://cv12jhxvmdwx" path="res://reward.gd" id="1_y65c6"]
+
+[node name="Node2D" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_y65c6")
+
+[node name="ButtonContinue" type="Button" parent="."]
+layout_mode = 0
+offset_left = 511.0
+offset_top = 440.0
+offset_right = 590.0
+offset_bottom = 471.0
+text = "Shop
+"
+
+[node name="LabelRewards" type="Label" parent="."]
+layout_mode = 0
+offset_left = 510.0
+offset_top = 144.0
+offset_right = 577.0
+offset_bottom = 167.0
+text = "Rewards"
+horizontal_alignment = 2

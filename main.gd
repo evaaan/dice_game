@@ -4,6 +4,8 @@ const MAX_ROLLS = 4
 const MAX_PLAYS = 4
 const DICE_COUNT = 5
 
+@onready var game_state = get_node("/root/GameState")
+
 var dice_values = []
 var dice_locked = []
 var rolls_left = MAX_ROLLS
@@ -24,11 +26,6 @@ var set_data = {
 }
 var dice_start_positions = []
 
-var round_min_scores = [200, 250, 300, 350, 400, 500, 600, 700, 850, 1000]
-var current_round = 1
-
-
-
 func _ready():
 	randomize()
 	dice_values.resize(DICE_COUNT)
@@ -41,14 +38,14 @@ func _ready():
 
 	$ButtonRoll.pressed.connect(_on_roll_pressed)
 	$ButtonPlay.pressed.connect(_on_play_pressed)
-	$ButtonRestart.pressed.connect(_on_restart_pressed)
-
+	$ButtonDebug.pressed.connect(_on_debug_pressed)
+	$ButtonMainMenu.pressed.connect(_on_main_menu_pressed)
+	
 	start_new_round()
 
 
 func start_new_round():
 	reset_set_score()
-	rolls_left = MAX_ROLLS
 	for i in range(DICE_COUNT):
 		dice_locked[i] = false
 		dice_values[i] = randi() % 6 + 1
@@ -204,20 +201,20 @@ func update_ui():
 
 	$LabelContainer/LabelRollsLeft.text = "Rolls Left: %d" % rolls_left
 	$LabelContainer/LabelPlaysLeft.text = "Plays Left: %d" % plays_left
+	$LabelContainer/LabelTotalScore.text = "Total Score: %d" % total_score
+	
+	$LabelContainer/LabelMoney.text = "Money: $%d" % game_state.money
 
 	if set_type == "None":
 		$LabelContainer/LabelSetType.text = ""
 	else:
-		$LabelContainer/LabelSetType.text = "Set: %s" % set_type
+		$LabelContainer/LabelSetType.text = "%s" % set_type
 
 	$LabelContainer/LabelPoints.text = "Points: %d" % points
 	$LabelContainer/LabelMult.text = "Multiplier: %d" % mult
+	$LabelContainer/LabelMinScore.text = "Minimum Score: %d" % game_state.get_current_score_threshold()
+	$LabelContainer/LabelRoundNumber.text = "Round %d of %d" % [game_state.current_round, game_state.round_min_scores.size()]
 
-	var round_min_score = round_min_scores[min(current_round - 1, round_min_scores.size() - 1)]
-	$LabelContainer/LabelMinScore.text = "Minimum Score: %d" % round_min_score
-	$LabelContainer/LabelRoundNumber.text = "Round %d of %d" % [current_round, round_min_scores.size()]
-
-	$LabelContainer/LabelTotalScore.text = "Total Score: %d" % total_score
 
 func _on_roll_pressed():
 	if rolls_left > 0:
@@ -229,6 +226,8 @@ func _on_roll_pressed():
 
 func _on_play_pressed():
 	if plays_left > 0:
+		plays_left -= 1
+		update_ui()
 		$ButtonRoll.disabled = true
 		$ButtonPlay.disabled = true
 		
@@ -251,13 +250,20 @@ func _on_play_pressed():
 		play_scoring_animation(scoring_indices, 0, 0, base_points)
 
 
-func _on_restart_pressed():
-	# Reset entire game
+func _on_debug_pressed():
+	total_score += 100
+	update_ui()
+
+func _on_main_menu_pressed():
+	# Reset game state
 	total_score = 0
 	plays_left = MAX_PLAYS
-	start_new_round()
-	$ButtonRoll.disabled = false
-	$ButtonPlay.disabled = false
+	rolls_left = MAX_ROLLS
+	game_state.current_round = 1
+	game_state.money = 5  # Reset money to starting amount
+	
+	# Return to main menu
+	get_tree().change_scene_to_file("res://MainMenu.tscn")
 
 func detect_set_type():
 	var selected_values = []
@@ -335,7 +341,7 @@ func play_scoring_animation(selected_indices, current_index, cumulative_score, c
 	tween.tween_property(dice_sprite, "scale", original_scale * 1.3, 0.2).set_trans(Tween.TRANS_BACK)
 
 	# Show temporary score label above dice
-	var label = $ScoreLabel
+	var label = $LabelContainer/ScoreLabel
 	label.text = "+%d" % dice_value
 	label.global_position = dice_sprite.global_position + Vector2(0, -60)
 	label.visible = true
@@ -378,23 +384,30 @@ func end_scoring_animation(dice_total_score):
 	tween.tween_callback(func():
 		reset_set_score()
 		
-		var round_min_score = round_min_scores[min(current_round - 1, round_min_scores.size() - 1)]
+		var round_min_score = game_state.get_current_score_threshold()
 		
 		if total_score >= round_min_score:
-			print("Round %d cleared! Score: %d" % [current_round, total_score])
+			print("Round cleared! Score: %d" % total_score)
 			
-			# Clearly reset score and increment round
+			# Calculate rewards before resetting
+			var plays_remaining = plays_left
+			
+			# Reset score 
 			total_score = 0
-			current_round += 1
 			
-			if current_round > round_min_scores.size():
-				game_won()
-			else:
-				# Reset clearly plays_left and start new round
-				plays_left = MAX_PLAYS
-				start_new_round()
+			# Advance to next round
+			game_state.advance_round()
+			
+			# Create timer for delay then transition
+			plays_left = MAX_PLAYS
+			rolls_left = MAX_ROLLS
+			# start_new_round()
+			var timer = get_tree().create_timer(1.0)
+			timer.timeout.connect(func(): 
+				game_state.tmp_plays_remaining = plays_remaining
+				get_tree().change_scene_to_file("res://Reward.tscn")
+			)
 		else:
-			plays_left -= 1
 			if plays_left <= 0:
 				game_over()
 			else:

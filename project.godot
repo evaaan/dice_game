@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="DiceGame"
-run/main_scene="uid://c2df5vjej30ly"
+run/main_scene="uid://c20t4fbyfa6ct"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[autoload]
+
+GameState="*res://game_state.gd"
 
 [rendering]
 
