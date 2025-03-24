@@ -34,6 +34,53 @@ scale = Vector2(0.5, 0.5)
 position = Vector2(750, 100)
 scale = Vector2(0.5, 0.5)
 
+[node name="JokerContainer" type="HBoxContainer" parent="."]
+custom_minimum_size = Vector2(400, 0)
+offset_left = 306.0
+offset_top = 51.0
+offset_right = 822.0
+offset_bottom = 100.0
+
+[node name="JokerBox1" type="PanelContainer" parent="JokerContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="JokerContainer/JokerBox1"]
+layout_mode = 2
+text = "Joker"
+
+[node name="JokerBox2" type="PanelContainer" parent="JokerContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="JokerContainer/JokerBox2"]
+layout_mode = 2
+text = "Joker"
+
+[node name="JokerBox3" type="PanelContainer" parent="JokerContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="JokerContainer/JokerBox3"]
+layout_mode = 2
+text = "Joker"
+
+[node name="JokerBox4" type="PanelContainer" parent="JokerContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="JokerContainer/JokerBox4"]
+layout_mode = 2
+text = "Joker"
+
+[node name="JokerBox5" type="PanelContainer" parent="JokerContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="JokerContainer/JokerBox5"]
+layout_mode = 2
+text = "Joker"
+
 [node name="ButtonRoll" type="Button" parent="."]
 custom_minimum_size = Vector2(100, 50)
 offset_left = 565.0
@@ -157,3 +204,9 @@ offset_right = 1042.0
 offset_bottom = 553.0
 text = "+100 Points (Debug)
 "
+
+[node name="LabelDiceScore" type="Label" parent="."]
+offset_left = 93.0
+offset_top = 525.0
+offset_right = 133.0
+offset_bottom = 548.0

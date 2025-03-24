@@ -13,8 +13,13 @@ func _ready():
 	reward_text += "Previous: $%d\n" % game_state.money
 	reward_text += "Round Reward: $%d\n" % rewards["base"]
 	reward_text += "Unused Sets: %d x $1 = $%d\n" % [game_state.tmp_plays_remaining, rewards["unused_plays"]]
-	reward_text += "Interest: $1 x %d = $%d\n\n" % [rewards["interest"], rewards["interest"]]
-	reward_text += "Total Money: $%d" % (game_state.money + rewards["total"])
+	reward_text += "Interest: $1 x %d = $%d\n" % [rewards["interest"], rewards["interest"]]
+	
+	# Add Gold joker reward if present
+	if rewards["gold"] > 0:
+		reward_text += "Gold Joker: $%d\n" % rewards["gold"]
+	
+	reward_text += "\nTotal Money: $%d" % (game_state.money + rewards["total"])
 	
 	$LabelRewards.text = reward_text
 	

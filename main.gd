@@ -26,6 +26,12 @@ var set_data = {
 }
 var dice_start_positions = []
 
+# Variables for joker effects
+var additional_chips = 0
+var additional_multiplier = 0
+var permanent_chips = 0
+var permanent_multiplier = 0
+
 func _ready():
 	randomize()
 	dice_values.resize(DICE_COUNT)
@@ -42,7 +48,39 @@ func _ready():
 	$ButtonMainMenu.pressed.connect(_on_main_menu_pressed)
 	
 	start_new_round()
+	
+	# Set up joker display boxes
+	update_joker_display()
 
+func update_joker_display():
+	# Hide all joker boxes first
+	for i in range(1, 6):
+		var joker_box = get_node_or_null("JokerContainer/JokerBox" + str(i))
+		if joker_box:
+			joker_box.visible = false
+	
+	# Show active jokers
+	for i in range(game_state.active_jokers.size()):
+		var joker_id = game_state.active_jokers[i]
+		var joker_data = game_state.all_jokers[joker_id]
+		var joker_box = get_node("JokerContainer/JokerBox" + str(i+1))
+		
+		joker_box.visible = true
+		var label = joker_box.get_node("Label")
+		
+		# Set color based on joker type
+		var color_code = ""
+		if joker_data["type"] == "common":
+			color_code = "[color=#ffffff]"  # White for common
+		elif joker_data["type"] == "rare":
+			color_code = "[color=#4488ff]"  # Blue for rare
+		elif joker_data["type"] == "epic":
+			color_code = "[color=#aa44ff]"  # Purple for epic
+		
+		label.text = color_code + joker_data["name"] + "[/color]"
+		
+		# Set tooltip
+		joker_box.tooltip_text = joker_data["description"]
 
 func start_new_round():
 	reset_set_score()
@@ -171,21 +209,16 @@ func get_scoring_dice():
 	return scoring_indices
 
 
-func calculate_round_score():
-	var selected_values = []
-	for i in range(DICE_COUNT):
-		if dice_locked[i]:
-			selected_values.append(dice_values[i])
-
-	var set_type = detect_set_type()
+func calculate_score(dice_set):
+	var set_type = detect_set_type(dice_set)
 	var points = set_data[set_type].points
 	var mult = set_data[set_type].mult
 
 	var dice_sum = 0
-	for val in selected_values:
+	for val in dice_set:
 		dice_sum += val
 
-	return (points + dice_sum) * mult
+	return {"points": (points + dice_sum) * mult, "type": set_type}
 	
 func show_set_score(score):
 	$LabelContainer/LabelSetScore.text = "%d" % score
@@ -202,6 +235,7 @@ func update_ui():
 	$LabelContainer/LabelRollsLeft.text = "Rolls Left: %d" % rolls_left
 	$LabelContainer/LabelPlaysLeft.text = "Plays Left: %d" % plays_left
 	$LabelContainer/LabelTotalScore.text = "Total Score: %d" % total_score
+	$LabelContainer/LabelTotalScore.visible = true
 	
 	$LabelContainer/LabelMoney.text = "Money: $%d" % game_state.money
 
@@ -227,28 +261,148 @@ func _on_roll_pressed():
 func _on_play_pressed():
 	if plays_left > 0:
 		plays_left -= 1
+		
+		# Apply Green joker effect (if active) when playing
+		if "green" in game_state.active_jokers:
+			game_state.green_mult += 1
+		
+		# Reset temporary joker effects for this play
+		additional_chips = 0
+		additional_multiplier = 0
+		
+		# Calculate score based on selected dice
+		var selected_dice = []
+		var selected_indices = []
+		
+		for i in range(dice_values.size()):
+			if dice_locked[i]:
+				selected_dice.append(dice_values[i])
+				selected_indices.append(i)
+		
+		var score_result = calculate_score(selected_dice)
+		var points = score_result["points"]
+		var score_type = score_result["type"]
+		
+		# Apply joker effects based on score type and dice values
+		apply_joker_effects(selected_dice.duplicate(), score_type)
+		
+		# Apply additional points from jokers
+		points += additional_chips
+		points *= (1 + (additional_multiplier / 100.0))
+		
+		# Apply permanent bonuses
+		points += permanent_chips
+		points *= (1 + (permanent_multiplier / 100.0))
+		
+		# Round to integer
+		points = int(points)
+		
+		# Update total score
+		# total_score += points
+		
+		# Play scoring animation
+		play_scoring_animation(selected_indices, 0, 0, points)
+		
+		# Update UI
 		update_ui()
-		$ButtonRoll.disabled = true
-		$ButtonPlay.disabled = true
 		
-		var scoring_indices = get_scoring_dice()
+		# Check if all plays are used
+		if plays_left <= 0:
+			# Create timer for delay then transition
+			var timer = get_tree().create_timer(1.0)
+			timer.timeout.connect(func(): 
+				game_state.tmp_plays_remaining = plays_left
+				get_tree().change_scene_to_file("res://Reward.tscn")
+			)
 		
-		# Sort clearly by dice X-position (left to right)
-		scoring_indices.sort_custom(func(a, b):
-			var dice_a = get_node("DiceContainer/Dice%d" % (a + 1))
-			var dice_b = get_node("DiceContainer/Dice%d" % (b + 1))
-			return dice_a.position.x < dice_b.position.x
-		)
-		
-		var set_type = detect_set_type()
-		var base_points = set_data[set_type].points
-		
-		if scoring_indices.size() == 0:
-			end_scoring_animation(0)
-			return
-		
-		play_scoring_animation(scoring_indices, 0, 0, base_points)
-
+func apply_joker_effects(dice_set, score_type):
+	# Reset temporary effects
+	additional_chips = 0
+	additional_multiplier = 0
+	
+	# Check each active joker
+	for joker_id in game_state.active_jokers:
+		match joker_id:
+			"blue":
+				# Odd dice give +20 chips
+				for value in dice_set:
+					if value % 2 == 1:  # Odd dice
+						additional_chips += 20
+			
+			"red":
+				# Even dice give +4 mult
+				for value in dice_set:
+					if value % 2 == 0:  # Even dice
+						additional_multiplier += 4
+			
+			"snake_eyes":
+				# 1s add +10 chips on score
+				for value in dice_set:
+					if value == 1:
+						additional_chips += 10
+			
+			"blue_double":
+				# Double gives +40 chips
+				if score_type == "double":
+					additional_chips += 40
+			
+			"red_double":
+				# Doubles give +10 mult
+				if score_type == "double":
+					additional_multiplier += 10
+			
+			"blue_triple":
+				# Triple gives +60 chips
+				if score_type == "triple":
+					additional_chips += 60
+			
+			"red_triple":
+				# Triple gives +15 mult
+				if score_type == "triple":
+					additional_multiplier += 15
+			
+			"little_scale":
+				# Little adds +20 chips permanently on score
+				if score_type == "little":
+					permanent_chips += 20
+			
+			"half":
+				# +20 mult on 2 dice or less
+				if dice_set.size() <= 2:
+					additional_multiplier += 20
+			
+			"sixes":
+				# Scored 6s give +15 chips and +4 mult
+				for value in dice_set:
+					if value == 6:
+						additional_chips += 15
+						additional_multiplier += 4
+			
+			"scaling_lows":
+				# Scoring 1s, 2s, 3s permanently gives +1 mult scaling to the joker
+				for value in dice_set:
+					if value >= 1 and value <= 3:
+						game_state.scaling_lows_mult += 1
+				additional_multiplier += game_state.scaling_lows_mult
+			
+			"green":
+				# Permanently gains +1 mult per play, -1 mult per reroll
+				additional_multiplier += game_state.green_mult
+			
+			"pair_scale":
+				# x2 mult for pair
+				if score_type == "double":
+					additional_multiplier += 1  # x2 multiplier
+			
+			"triple_scale":
+				# x3 mult for triple
+				if score_type == "triple":
+					additional_multiplier += 2  # x3 multiplier
+			
+			"quad_scale":
+				# x3 mult for quad
+				if score_type == "quad":
+					additional_multiplier += 2  # x3 multiplier
 
 func _on_debug_pressed():
 	total_score += 100
@@ -261,15 +415,24 @@ func _on_main_menu_pressed():
 	rolls_left = MAX_ROLLS
 	game_state.current_round = 1
 	game_state.money = 5  # Reset money to starting amount
+	game_state.active_jokers = []  # Reset jokers
+	game_state.scaling_lows_mult = 0
+	game_state.green_mult = 0
+	permanent_chips = 0
+	permanent_multiplier = 0
 	
 	# Return to main menu
 	get_tree().change_scene_to_file("res://MainMenu.tscn")
 
-func detect_set_type():
+func detect_set_type(dice_set = null):
 	var selected_values = []
-	for i in range(DICE_COUNT):
-		if dice_locked[i]:
-			selected_values.append(dice_values[i])
+	
+	if dice_set == null:
+		for i in range(DICE_COUNT):
+			if dice_locked[i]:
+				selected_values.append(dice_values[i])
+	else:
+		selected_values = dice_set
 
 	if selected_values.size() == 0:
 		return "None"
@@ -341,7 +504,7 @@ func play_scoring_animation(selected_indices, current_index, cumulative_score, c
 	tween.tween_property(dice_sprite, "scale", original_scale * 1.3, 0.2).set_trans(Tween.TRANS_BACK)
 
 	# Show temporary score label above dice
-	var label = $LabelContainer/ScoreLabel
+	var label = $LabelDiceScore
 	label.text = "+%d" % dice_value
 	label.global_position = dice_sprite.global_position + Vector2(0, -60)
 	label.visible = true
@@ -412,7 +575,7 @@ func end_scoring_animation(dice_total_score):
 				game_over()
 			else:
 				start_new_round()
-
+		
 		$ButtonRoll.disabled = false
 		$ButtonPlay.disabled = false
 	)
@@ -453,3 +616,21 @@ func _input(event):
 					dice_sprite.position.y += 50
 
 				update_ui()
+
+func _on_reroll_pressed():
+	if rolls_left > 0 and plays_left > 0:
+		rolls_left -= 1
+		
+		# Apply Green joker effect (if active) when rerolling
+		if "green" in game_state.active_jokers:
+			game_state.green_mult -= 1
+		
+		# Reroll unselected dice
+		for i in range(DICE_COUNT):
+			if not dice_locked[i]:
+				dice_values[i] = randi() % 6 + 1
+				var dice_sprite = get_node("DiceContainer/Dice%d" % (i + 1))
+				dice_sprite.texture = load("res://dice_%d.png" % dice_values[i])
+		
+		# Update UI
+		update_ui()
