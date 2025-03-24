@@ -1,7 +1,7 @@
 extends Node2D
 
-const MAX_ROLLS = 3
-const MAX_PLAYS = 3
+const MAX_ROLLS = 4
+const MAX_PLAYS = 4
 const DICE_COUNT = 5
 
 var dice_values = []
@@ -23,6 +23,10 @@ var set_data = {
 	"None": {"points": 0, "mult": 0}
 }
 var dice_start_positions = []
+
+var round_min_scores = [200, 250, 300, 350, 400, 500, 600, 700, 850, 1000]
+var current_round = 1
+
 
 
 func _ready():
@@ -53,27 +57,45 @@ func start_new_round():
 		dice_sprite.position = dice_start_positions[i]
 		update_dice_border(dice_sprite, false)
 
-	display_dice()
-	update_ui() # Now clearly resets points and mult at round start
+	display_dice([0,1,2,3,4])  # clearly animate all dice initially
+	update_ui()
 
 
-
-func display_dice():
+func display_dice(rolled_indices=[]):
 	for i in range(DICE_COUNT):
 		var dice_sprite = get_node("DiceContainer/Dice%d" % (i + 1))
 		dice_sprite.texture = load("res://dice_%d.png" % dice_values[i])
-		update_dice_border(dice_sprite, dice_locked[i])
+		
+		if i in rolled_indices:
+			animate_dice_roll(dice_sprite)  # animate clearly only rolled dice
+
 
 func update_dice_border(dice_sprite, selected):
 	if selected:
 		dice_sprite.modulate = Color(1, 1, 0.4)  # Slightly yellow tint
 	else:
 		dice_sprite.modulate = Color(1, 1, 1)  # No tint
+		
+func animate_dice_roll(dice_sprite):
+	var tween = create_tween()
+	var original_rotation = dice_sprite.rotation_degrees
+
+	# Rocking animation (rotate slightly back and forth)
+	tween.tween_property(dice_sprite, "rotation_degrees", original_rotation - 10, 0.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(dice_sprite, "rotation_degrees", original_rotation + 10, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	# tween.tween_property(dice_sprite, "rotation_degrees", original_rotation - 10, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	# tween.tween_property(dice_sprite, "rotation_degrees", original_rotation + 10, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(dice_sprite, "rotation_degrees", original_rotation, 0.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+
 
 func roll_unlocked_dice():
+	var rolled_indices = []
 	for i in range(DICE_COUNT):
 		if not dice_locked[i]:
 			dice_values[i] = randi() % 6 + 1
+			rolled_indices.append(i)
+	return rolled_indices
+
 			
 func get_scoring_dice():
 	var selected_values = []
@@ -182,22 +204,28 @@ func update_ui():
 
 	$LabelContainer/LabelRollsLeft.text = "Rolls Left: %d" % rolls_left
 	$LabelContainer/LabelPlaysLeft.text = "Plays Left: %d" % plays_left
-	$LabelContainer/LabelTotalScore.text = "Total Score: %d" % total_score
+
 	if set_type == "None":
 		$LabelContainer/LabelSetType.text = ""
 	else:
-		$LabelContainer/LabelSetType.text = "%s" % set_type
+		$LabelContainer/LabelSetType.text = "Set: %s" % set_type
 
 	$LabelContainer/LabelPoints.text = "Points: %d" % points
 	$LabelContainer/LabelMult.text = "Multiplier: %d" % mult
 
+	var round_min_score = round_min_scores[min(current_round - 1, round_min_scores.size() - 1)]
+	$LabelContainer/LabelMinScore.text = "Minimum Score: %d" % round_min_score
+	$LabelContainer/LabelRoundNumber.text = "Round %d of %d" % [current_round, round_min_scores.size()]
+
+	$LabelContainer/LabelTotalScore.text = "Total Score: %d" % total_score
 
 func _on_roll_pressed():
 	if rolls_left > 0:
-		roll_unlocked_dice()
+		var rolled_indices = roll_unlocked_dice()  # clearly capture indices rolled
 		rolls_left -= 1
-		display_dice()
+		display_dice(rolled_indices)  # clearly pass rolled dice indices
 		update_ui()
+
 
 func _on_play_pressed():
 	if plays_left > 0:
@@ -287,7 +315,7 @@ func detect_set_type():
 func play_scoring_animation(selected_indices, current_index, cumulative_score, current_points):
 	if current_index >= selected_indices.size():
 		var tween_final = create_tween()
-		tween_final.tween_interval(1.0)
+		tween_final.tween_interval(0.5)
 		tween_final.tween_callback(func():
 			end_scoring_animation(cumulative_score)
 		)
@@ -319,7 +347,7 @@ func play_scoring_animation(selected_indices, current_index, cumulative_score, c
 	label_tween.parallel().tween_property(label, "modulate:a", 0, 0.5)
 
 	# Scale-down dice after short pause
-	tween.tween_interval(0.25)
+	tween.tween_interval(0.15)
 	tween.tween_property(dice_sprite, "scale", original_scale, 0.2).set_trans(Tween.TRANS_BACK)
 
 	tween.tween_callback(func():
@@ -327,14 +355,13 @@ func play_scoring_animation(selected_indices, current_index, cumulative_score, c
 
 		if current_index == selected_indices.size() - 1:
 			var final_tween = create_tween()
-			final_tween.tween_interval(0.5)
+			# final_tween.tween_interval(0.25)
 			final_tween.tween_callback(func():
 				end_scoring_animation(cumulative_score + dice_value)
 			)
 		else:
 			play_scoring_animation(selected_indices, current_index + 1, cumulative_score + dice_value, current_points)
 	)
-
 
 func end_scoring_animation(dice_total_score):
 	var set_type = detect_set_type()
@@ -344,33 +371,55 @@ func end_scoring_animation(dice_total_score):
 	var round_score = (points + dice_total_score) * mult
 	total_score += round_score
 	
-	# Temporarily show set score
 	show_set_score(round_score)
 	
 	var tween = create_tween()
-	tween.tween_interval(1.0)
+	tween.tween_interval(0.5)
 	tween.tween_callback(func():
 		reset_set_score()
 		
-		print("Round Score: %d, Total Score: %d" % [round_score, total_score])
-
-		plays_left -= 1
-		if plays_left > 0:
-			start_new_round()
+		var round_min_score = round_min_scores[min(current_round - 1, round_min_scores.size() - 1)]
+		
+		if total_score >= round_min_score:
+			print("Round %d cleared! Score: %d" % [current_round, total_score])
+			
+			# Clearly reset score and increment round
+			total_score = 0
+			current_round += 1
+			
+			if current_round > round_min_scores.size():
+				game_won()
+			else:
+				# Reset clearly plays_left and start new round
+				plays_left = MAX_PLAYS
+				start_new_round()
 		else:
-			game_over()
+			plays_left -= 1
+			if plays_left <= 0:
+				game_over()
+			else:
+				start_new_round()
 
 		$ButtonRoll.disabled = false
 		$ButtonPlay.disabled = false
 	)
 
 
+func game_won():
+	$ButtonRoll.disabled = true
+	$ButtonPlay.disabled = true
+	$LabelContainer/LabelPlaysLeft.text = "You Won!"
+	$LabelContainer/LabelTotalScore.text = "Final Score: %d" % total_score
+	print("Congratulations! You won with score:", total_score)
+
 
 func game_over():
 	$ButtonRoll.disabled = true
 	$ButtonPlay.disabled = true
-	$LabelContainer/LabelPlaysLeft.text = "Game Over!\nFinal Score: %d" % total_score
+	$LabelContainer/LabelPlaysLeft.text = "Game Over!"
+	$LabelContainer/LabelTotalScore.text = "Final Score: %d" % total_score
 	print("Game Over! Your final score:", total_score)
+
 
 func _input(event):
 	if event is InputEventMouseButton and event.pressed:
